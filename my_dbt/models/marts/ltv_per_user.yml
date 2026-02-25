@@ -1,0 +1,4 @@
+models:
+ - name: ltv_per_user
+   description: "The lifetime value of a user"
+   

@@ -1,0 +1,10 @@
+sources:
+  - name: raw_data # this is the source_name
+    database: audicin-assignment
+    schema: bronze
+    tables:
+      - name: events # this is the table_name
+      - name: marketing_spend
+      - name: subscriptions
+      - name: currency_rates
+

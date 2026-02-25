@@ -1,0 +1,27 @@
+models:
+  - name: stg_events
+    description: The data from events.ndjson with basic cleaning, type casting and deduplication.
+    columns:
+      - name: event_id
+        description: The unique key for each event.
+        data_tests:
+          - not_null
+          - unique
+      - name: user_id
+        data_tests:
+          - not_null
+    tests:
+      - dbt_utils.equality:
+          compare_model: source('raw_data', 'events')
+          compare_columns:
+            - event_id
+            - user_id
+            - refers_to_event_id
+            - timestamp
+            - acquisition_channel
+            - event_type
+            - page
+            - schema_version
+            - amount
+            - currency
+            - tax

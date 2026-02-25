@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: int_users_first_event
+    description: "A helper table for daily_active_users to identify new users."
+    columns:
+      - name: user_id
+        data_tests:
+          - unique
+          - not_null
+      - name: first_event_date
+        data_tests:
+          - not_null

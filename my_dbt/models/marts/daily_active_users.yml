@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: daily_active_users
+    description: "Daily unique users with key dimensions for segmentation and behavioral analysis."
+    columns:
+      - name: event_date
+        description: "The date of user activity."
+        data_tests:
+          - not_null
+      - name: user_id
+        description: "Unique identifier for the user."
+        data_tests:
+          - not_null

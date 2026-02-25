@@ -1,0 +1,11 @@
+models:
+  - name: stg_subscriptions
+    description: The data from subscriptions with type casting and processing duplicates for each date and channel.
+    columns:
+      - name: subscription_id
+        data_tests:
+          - not_null
+          - unique
+      - name: user_id
+        data_tests:
+          - not_null

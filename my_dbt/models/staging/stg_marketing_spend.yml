@@ -1,0 +1,13 @@
+models:
+  - name: stg_marketing_spend
+    description: The data from marketing_spend with type casting and processing duplicates for each date and channel.
+    columns:
+      - name: spend_date
+        data_tests:
+          - not_null
+      - name: channel
+        data_tests:
+          - not_null
+      - name: spend
+        data_tests:
+          - not_null
