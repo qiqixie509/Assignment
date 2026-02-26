@@ -62,6 +62,7 @@ In this table, the `event_id` is unique and not null, `user_id` is not null. The
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |event_id|string|The unique identifier of the event.|
 |user_id|string|The unique identifier of the user.|
 |refers_to_event_id|string|The unique identifier of the event that this event refers to.|
@@ -88,6 +89,7 @@ This table is the cleaned version of the raw subscriptions data, with some basic
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |subscription_id|string|The unique identifier of the subscription.| 
 |user_id|string|The unique identifier of the user.| 
 |plan_id|string|The unique identifier of the plan.| 
@@ -107,6 +109,7 @@ This is a cleaned version of the raw marketing spend data, with some basic data 
 
 columns:
 |column|type|description|
+|---|---|---|
 |spend_date|date|The date of the spend.|
 |channel|string|The channel of the spend.|
 |spend|double|The amount of the spend.|
@@ -127,6 +130,7 @@ This table is a helper table to convert the amounts and tax in different currenc
 
 columns:
 |column|type|description|
+|---|---|---|
 |event_id|string|The unique identifier of the event.|
 |user_id|string|The unique identifier of the user.|
 |amount|double|The amount of the event.|
@@ -150,6 +154,7 @@ This is a helper table for daily_active_users, which stores the first event date
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |user_id|string|The unique identifier of the user.|
 |first_event_date|date|The date of the first event.|
 
@@ -170,6 +175,7 @@ This table is a daily active users table, one row per user per day.
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |user_id|string|The unique identifier of the user.| 
 |event_date|date|The date of the event.|
 
@@ -187,7 +193,6 @@ This table is a daily gross revenue table, one row per day, which is the sum of 
 |column|type|description|
 |---|---|---|
 |event_date|date|The date of the event.| 
-|---|---|
 |gross_revenue|double|The gross revenue of the event.| 
 
 
@@ -203,7 +208,6 @@ This table is a daily net revenue table, one row per day, which is the sum of al
 |column|type|description|
 |---|---|---|
 |event_date|date|The date of the event.| 
-|---|---|
 |net_revenue|double|The net revenue of the event.| 
 
 Backfilling:
@@ -222,6 +226,7 @@ This table is a daily MRR table, one row per subscription per active day. An act
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |event_date|date|The date of the event.| 
 |mrr|double|The MRR of the event.| 
 
@@ -237,6 +242,7 @@ This talbe calculates weekly retention rates for user cohorts based on their sig
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |cohort_week|date|The date of the cohort.| 
 |week_0|double|The number of retained users in week 0.| 
 |week_1|double|The number of retained users in week 1.| 
@@ -257,6 +263,7 @@ The accuracy of this cac is tested by dbt expression test, that the accuracy of 
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |event_date|date|The date of the event.| 
 |channel|string|The channel of the event.| 
 |new_user_count|int|The number of new users in that day.| 
@@ -275,6 +282,7 @@ This table is a daily snapshot table that tracks the cumulative LTV per user. Th
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |user_id|string|The unique identifier of the user.| 
 |event_date|date|The date of the event.| 
 |channel|string|The channel of the event.| 
@@ -292,6 +300,7 @@ This table is a daily LTV/CAC ratio table, one row per day, which is the sum of 
 
 **columns**:
 |column|type|description|
+|---|---|---|
 |user_id|string|The unique identifier of the user.| 
 |event_date|date|The date of the event.| 
 |channel|string|The channel of the event.| 
