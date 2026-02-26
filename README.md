@@ -1,21 +1,28 @@
 # Audicin_assignment
 
-The stack I used in this assignment is dbt + Databricks + AWS S3. The code is orgnized to medallion layers, which orgnized as bronze (raw_data), silver (stg_data + int_data), gold (marts). All the code is under `my_dbt` directory, all the dbt related commands should be run in the `my_dbt` directory.         
+The stack I used in this assignment is dbt + Databricks + AWS S3. The code is orgnized to medallion layers, which orgnized as bronze (raw_data), silver (stg_data + int_data), gold (marts). All the code is under `my_dbt` directory, all the dbt related commands should be run in the `my_dbt` directory.     
+
 **Bronze/Silver/Gold layers (or equivalent) and why**               
 Medallion layers is classic data architecture pattern, which separate the raw data, cleaned data, and metrics, making each layer can be rebuilt independently if errors occur. The incremental processing reduces computational load and provides strong scalability.           
 
 **Storage format choices (e.g., Parquet/Iceberg/Delta; or DuckDB/SQLite; or warehouse tables)**          
-Since the data is stored in Databricks, I used delta format for all the tables.        
+Since the data is stored in Databricks, I used delta format for all the tables.  
+
 **Partitioning/clustering strategy**         
 Partitioning is used to divide the data into smaller partitions based on the date, which improves the query performance. For specific patition keys in each table, see the table schema in the following sections.           
+
 **Incremental strategy (how you avoid full refreshes)**        
-In this assignment, incremental strategy is used to avoid full refreshes. To fetch new data, I always set the specific date window (start date to start date + interval).        
+In this assignment, incremental strategy is used to avoid full refreshes. To fetch new data, I always set the specific date window (start date to start date + interval).    
+
 **Idempotency strategy (how re‑runs and partial failures behave)**      
-In this assignment, tables are incremental models with merge strategy, unique keys prevent duplicate records, and backfills are safe, merging oversrites only relevant rows. Table `ltv_per_user` is cumulative metrics, it adds new revenue to the previous LTV without duplicating values.        
+In this assignment, tables are incremental models with merge strategy, unique keys prevent duplicate records, and backfills are safe, merging oversrites only relevant rows. Table `ltv_per_user` is cumulative metrics, it adds new revenue to the previous LTV without duplicating values.    
+
 **How you handle schema evolution + timestamp normalization**         
 Based on the medallion architecture with incremental models, the models are defined with unique keys, so new columns can be added without rewriting the full table. For updating the full history, backfilling is needed.       
+
 **How you handle corrupted rows (quarantine strategy)**          
-For the corrupted rows, the incremental models + full refresh can easily handle the corrupted rows. Therefore, there is no need to quarantine the corrupted rows.         
+For the corrupted rows, the incremental models + full refresh can easily handle the corrupted rows. Therefore, there is no need to quarantine the corrupted rows.    
+
 **Backfill strategy (how you rebuild historical data correctly)**         
 For backfilling, I set up the varibales `start_date` and `interval`, and use the `--vars` option to specify the date window. For example, to backfill the data from 2026-01-01 to 2026-02-01, use the following command:
 
