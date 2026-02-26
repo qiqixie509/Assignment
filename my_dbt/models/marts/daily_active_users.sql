@@ -12,17 +12,15 @@
 with daily_events as (
     select 
         user_id,
-        channel,
         event_date
     from {{ ref('stg_events') }}
     where event_date between TO_DATE(CAST({{ start_date }} AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST({{ start_date }} AS STRING), 'yyyyMMdd'), {{ interval_days }})
-    group by 1, 2, 3
+    group by 1, 2
 ),
 new_users as (
     select
         e.user_id,
-        e.channel,
         e.event_date,
         u.first_event_date,
         case 
@@ -32,6 +30,7 @@ new_users as (
     from daily_events e
     left join {{ ref('int_users_first_event') }} u
         on e.user_id = u.user_id
+    order by event_date
 )
 
 select 

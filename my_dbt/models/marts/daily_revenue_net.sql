@@ -8,34 +8,24 @@
 {% set interval_days = var('interval', 1) %}
 {% set start_date = var('start_date') %}
 
-with gross_revenue as (
+with net_revenue as (
     select 
-        event_date,
-        gross_revenue
-    from {{ ref('daily_revenue_gross') }}
-    where event_date between TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
-    AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
-),
-refund_events as (
-    select 
-        event_date,
-        amount_in_euros
+    cast(o_ts as date) as date_day,
+    sum(
+        case 
+            when event_type = 'purchase' then amount_in_euros - tax_in_euros
+            when event_type = 'refund' then -amount_in_euros
+            ELSE 0
+        END
+    ) AS net_revenue,
+    max(event_date) as event_date
     from {{ ref('int_amounts_to_euros') }}
     where event_date between TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
-    and event_type = 'refund'
-),
-gross_refunds as (
-    select 
-        event_date,
-        sum(amount_in_euros) as refund_amount
-    from refund_events
-    group by 1
+    and event_type in ('purchase', 'refund')
+    group by to_date(o_ts)
+    order by 1
 )
 
-select 
-    event_date,
-    gross_revenue - refund_amount as net_revenue
-from gross_revenue
-left join gross_refunds using (event_date)
-order by 1
+select * from net_revenue
+

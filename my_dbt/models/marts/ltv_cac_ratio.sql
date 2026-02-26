@@ -1,38 +1,47 @@
 -- ltv_cac_ratio.sql
-{{ config(
-    materialized='table'
-) }}
+{{
+  config(
+    materialized='table',
+    incremental_strategy='merge',
+    unique_key=['event_date', 'channel']
+  )
+}}
 
-with channel_ltv AS (
+{% set start_date = var('start_date') %}
+{% set interval_days = var('interval', 1) %}
+
+with ltv_by_channel as (
     select
+        event_date,
         channel,
-        sum(ltv) as total_ltv,
-        count(user_id) as total_users
+        cast(sum(ltv) as numeric(12,4)) as total_ltv
     from {{ ref('ltv_per_user') }}
-    group by 1
+    where event_date between to_date('{{ start_date }}','yyyyMMdd')
+      and date_add(to_date('{{ start_date }}','yyyyMMdd'), {{ interval_days }})
+    group by 1,2
 ),
 
-channel_cac AS (
+cac as (
     select
+        event_date,
         channel,
-        cast(avg(cac) as numeric(12,2)) as avg_cac
+        cac
     from {{ ref('cac_by_channel') }}
-    group by 1
-),
-ltv_cac_ratio as (
-    select
-        l.channel,
-        l.total_ltv,
-        l.total_users,
-        c.avg_cac,
-        case 
-            when c.avg_cac = 0 then null
-            else cast(round((l.total_ltv / l.total_users) / c.avg_cac, 2) as numeric(12,2))
-        end as ltv_cac_ratio
-    from channel_ltv l
-    left join channel_cac c
-        on l.channel = c.channel
-    order by l.channel
+    where event_date between to_date('{{ start_date }}','yyyyMMdd')
+      and date_add(to_date('{{ start_date }}','yyyyMMdd'), {{ interval_days }})
 )
 
-select * from ltv_cac_ratio
+select
+    l.event_date,
+    l.channel,
+    l.total_ltv,
+    c.cac,
+    case 
+        when c.cac is null or c.cac = 0 then null
+        else cast(l.total_ltv / c.cac as numeric(12,2))
+    end as ltv_cac_ratio
+from ltv_by_channel l
+left join cac c
+    on l.event_date = c.event_date
+    and l.channel = c.channel
+order by l.event_date, l.channel

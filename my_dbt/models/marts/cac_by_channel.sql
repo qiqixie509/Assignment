@@ -21,28 +21,41 @@ with marketing_spend as (
     where spend_date between TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
 ),
-new_user_counts as (
-    select
+signup_events as (
+    select 
         event_date,
         channel,
-        count(user_id) as new_user_count
-    from {{ ref('daily_active_users') }}
+        user_id
+    from {{ ref('stg_events') }}
     where event_date between TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
-    and is_new_user = 1
+    and event_type = 'signup'
+),
+new_user_counts as (
+    select
+        dau.event_date,
+        se.channel,
+        count(dau.user_id) AS new_user_count
+    from {{ ref('daily_active_users') }} dau
+    inner join signup_events se
+    on dau.user_id = se.user_id
+    where dau.event_date BETWEEN TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
+                        AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
+    and dau.is_new_user = 1
     group by 1,2
 )
 
 select 
-    n.event_date,
-    n.channel,
+    coalesce(n.event_date, m.spend_date) as event_date,
+    coalesce(n.channel, m.channel) as channel,
     n.new_user_count,
     m.spend,
-    case 
-        when n.new_user_count = 0 then 0
-        else cast(round(m.spend / n.new_user_count, 2) as numeric(12,2))
-    end as cac
-from new_user_counts n
-left join marketing_spend m
-    on n.event_date = m.spend_date
-    and n.channel = m.channel
+    CASE 
+        WHEN COALESCE(new_user_count, 0) > 0 
+            THEN CAST(spend / new_user_count AS NUMERIC(12,4))
+        ELSE NULL
+    END AS cac
+from marketing_spend m
+left join new_user_counts n
+    on m.spend_date = n.event_date
+    and m.channel = n.channel

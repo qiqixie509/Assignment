@@ -1,4 +1,10 @@
 models:
- - name: ltv_per_user
-   description: "The lifetime value of a user"
-   
+  - name: ltv_per_user
+    description: "Lifetime value per user"
+    columns:
+      - name: user_id
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: ["user_id", "event_date"]

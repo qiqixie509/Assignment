@@ -3,7 +3,7 @@
     materialized='view',
     incremental_strategy='merge',
     unique_key=['subscription_id', 'user_id'],
-    partition_by = ['created_at']
+    partition_by = ['event_date']
 )}}
 
 
@@ -26,8 +26,8 @@ cleaned_data AS (
         upper(trim(currency)) as currency,
         try_cast(start_date as date) as start_date,
         try_cast(created_at as timestamp) as created_at,
-        to_date(created_at) as created_date,
-        try_cast(end_date as date) as end_date
+        to_date(created_at) as event_date,
+        COALESCE(try_cast(end_date AS date), DATE '9999-12-31') AS end_date
     from raw_data
     where to_date(created_at) BETWEEN TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
@@ -35,4 +35,4 @@ cleaned_data AS (
 )
 
 SELECT * FROM cleaned_data
-qualify row_number() over (partition by subscription_id, user_id, plan_id order by created_at desc) = 1
+qualify row_number() over (partition by subscription_id, user_id, status, created_at order by created_at desc) = 1

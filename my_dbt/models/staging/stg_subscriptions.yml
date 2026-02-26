@@ -5,7 +5,14 @@ models:
       - name: subscription_id
         data_tests:
           - not_null
-          - unique
       - name: user_id
         data_tests:
           - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns: 
+            - subscription_id
+            - user_id
+            - status
+            - created_at
+            

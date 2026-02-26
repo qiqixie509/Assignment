@@ -1,0 +1,7 @@
+models:
+  - name: cac_by_channel
+    description: "CAC by channel"
+    data_tests:
+      - dbt_utils.expression_is_true:
+          expression: "new_user_count = 0 OR ABS(cac - spend / new_user_count) < 0.0001"
+  

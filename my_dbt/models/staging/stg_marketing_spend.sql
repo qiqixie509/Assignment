@@ -19,7 +19,8 @@ cleaned_data as (
     SELECT
         cast(date as date) as spend_date,
         COALESCE(trim(channel), 'unknown') AS channel,
-        cast(spend as double) as spend
+        cast(spend as double) as spend,
+        to_date(current_date()) as event_date
     FROM raw_data
     where date BETWEEN TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})

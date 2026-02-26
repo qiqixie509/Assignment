@@ -2,22 +2,42 @@
 {{ config(
     materialized = 'table',
     incremental_strategy = 'merge',
-    partition_by = ['created_date']
+    partition_by = ['event_date']
 )}}
 
 {% set interval_days = var('interval', 1) %}
 {% set start_date = var('start_date') %}
 
-with active_subscriptions_daily as (
+with data_spine as (
     select 
-        created_date,
-        cast(sum(price) as numeric(10,2)) as total_price,
-        count(subscription_id) as active_subscriptions
+        date_day
+    from {{ ref('int_data_spine') }}
+),
+subs as (
+    select 
+        subscription_id,
+        user_id,
+        start_date,
+        end_date,
+        price,
+        status,
+        event_date
     from {{ ref('stg_subscriptions') }}
-    where created_date between TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
+    where to_date(event_date) BETWEEN TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd')
     AND DATE_ADD(TO_DATE(CAST('{{ start_date }}' AS STRING), 'yyyyMMdd'), {{ interval_days }})
-    and status = 'active'
-    group by 1
+),
+expanded as (
+    select 
+        d.date_day,
+        s.subscription_id,
+        s.user_id,
+        s.price as mrr_value,
+        s.status,
+        s.event_date
+    from data_spine d
+    cross join subs s
+    where d.date_day between s.start_date and s.end_date
+    order by date_day, subscription_id
 )
 
-select * from active_subscriptions_daily
+select * from expanded

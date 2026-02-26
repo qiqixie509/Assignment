@@ -16,6 +16,7 @@ WITH raw_source AS (
     *
 FROM 
     {{ source('raw_data', 'events') }}
+
 ),
 cleaned_data AS (
     SELECT
@@ -46,4 +47,4 @@ cleaned_data AS (
 
 SELECT * FROM cleaned_data
 -- deduplicate
-qualify row_number() over (partition by event_id, user_id, event_type, amount, currency, tax order by event_date desc) = 1
+qualify row_number() over (partition by event_id, user_id, event_type, o_ts order by event_date desc) = 1
