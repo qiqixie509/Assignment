@@ -302,7 +302,7 @@ This table is a daily LTV/CAC ratio table, one row per day, which is the sum of 
 #### Data Lineage and Quality Checks:
 ![ltv_cac_ratio.png](picture/ltv_cac_ratio.png)
 
-**source_table**: stg_events, cac_by_channel       
+**source_table**: ltv_per_user, cac_by_channel       
 **partition_key**: event_date    
 
 **columns**:
