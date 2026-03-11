@@ -284,16 +284,16 @@ This table is a daily snapshot table that tracks the cumulative LTV per user. Th
 #### Data Lineage and Quality Checks:
 ![ltv_per_user.png](picture/ltv_per_user.png)
 
-**source_table**: stg_events, int_users_first_event
-**partition_key**: event_date
+**source_table**: int_amounts_to_euros, stg_events      
+**partition_key**: event_date    
 
 **columns**:
 |column|type|description|
 |---|---|---|
 |user_id|string|The unique identifier of the user.| 
-|event_date|date|The date of the event.| 
-|channel|string|The channel of the event.| 
-|is_new_user|int|Whether the user is a new user.| 
+|channel|string|The acquisition channel of the user (from signup event, defaults to 'unknown').| 
+|event_date|date|The date of the LTV snapshot.| 
+|ltv|double|The cumulative lifetime value of the user up to this date (net revenue in euros).| 
 
 
 
@@ -302,16 +302,17 @@ This table is a daily LTV/CAC ratio table, one row per day, which is the sum of 
 #### Data Lineage and Quality Checks:
 ![ltv_cac_ratio.png](picture/ltv_cac_ratio.png)
 
-**source_table**: stg_events, int_users_first_event
-**partition_key**: event_date
+**source_table**: stg_events, cac_by_channel       
+**partition_key**: event_date    
 
 **columns**:
 |column|type|description|
 |---|---|---|
-|user_id|string|The unique identifier of the user.| 
 |event_date|date|The date of the event.| 
-|channel|string|The channel of the event.| 
-|is_new_user|int|Whether the user is a new user.| 
+|channel|string|The acquisition channel.| 
+|total_ltv|decimal|The total LTV for the channel on that day.| 
+|cac|double|The customer acquisition cost for the channel on that day.| 
+|ltv_cac_ratio|decimal|The LTV/CAC ratio (total_ltv / cac), null if cac is 0 or null.| 
 
 
 ## How to run
